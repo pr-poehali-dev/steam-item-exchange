@@ -6,68 +6,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
-type ItemRarity = 'common' | 'uncommon' | 'rare' | 'legendary';
-
-interface SteamItem {
-  id: number;
-  name: string;
-  image: string;
-  rarity: ItemRarity;
-  price: number;
-  category: string;
-}
-
-const mockItems: SteamItem[] = [
-  {
-    id: 1,
-    name: 'AWP | Dragon Lore',
-    image: '🎯',
-    rarity: 'legendary',
-    price: 4500,
-    category: 'Weapon'
-  },
-  {
-    id: 2,
-    name: 'Karambit | Fade',
-    image: '🔪',
-    rarity: 'legendary',
-    price: 3200,
-    category: 'Knife'
-  },
-  {
-    id: 3,
-    name: 'M4A4 | Howl',
-    image: '🔫',
-    rarity: 'rare',
-    price: 2800,
-    category: 'Weapon'
-  },
-  {
-    id: 4,
-    name: 'AK-47 | Redline',
-    image: '⚡',
-    rarity: 'rare',
-    price: 180,
-    category: 'Weapon'
-  },
-  {
-    id: 5,
-    name: 'Desert Eagle | Blaze',
-    image: '🔥',
-    rarity: 'uncommon',
-    price: 450,
-    category: 'Weapon'
-  },
-  {
-    id: 6,
-    name: 'Glock-18 | Fade',
-    image: '💎',
-    rarity: 'uncommon',
-    price: 320,
-    category: 'Weapon'
-  }
-];
+import Header from '@/components/Header';
+import ItemCard from '@/components/ItemCard';
+import ComparePanel from '@/components/ComparePanel';
+import { SteamItem, mockItems, getRarityClass, getRarityBadgeColor } from '@/types/steam';
 
 export default function Index() {
   const [activeTab, setActiveTab] = useState('home');
@@ -92,82 +34,13 @@ export default function Index() {
     setShowCompare(false);
   };
 
-  const getRarityClass = (rarity: ItemRarity) => {
-    const classes = {
-      common: 'rarity-common',
-      uncommon: 'rarity-uncommon',
-      rare: 'rarity-rare',
-      legendary: 'rarity-legendary'
-    };
-    return classes[rarity];
-  };
-
-  const getRarityBadgeColor = (rarity: ItemRarity) => {
-    const colors = {
-      common: 'bg-muted-foreground/30',
-      uncommon: 'bg-[hsl(var(--uncommon))]',
-      rare: 'bg-[hsl(var(--rare))]',
-      legendary: 'bg-[hsl(var(--legendary))]'
-    };
-    return colors[rarity];
-  };
-
   const filteredItems = mockItems.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="text-4xl">⚡</div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              SteamTrade
-            </h1>
-          </div>
-
-          <nav className="hidden md:flex items-center gap-6">
-            <Button
-              variant={activeTab === 'home' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('home')}
-              className="gap-2"
-            >
-              <Icon name="Home" size={18} />
-              Главная
-            </Button>
-            <Button
-              variant={activeTab === 'inventory' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('inventory')}
-              className="gap-2"
-            >
-              <Icon name="Package" size={18} />
-              Инвентарь
-            </Button>
-            <Button
-              variant={activeTab === 'trades' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('trades')}
-              className="gap-2"
-            >
-              <Icon name="Repeat" size={18} />
-              Обмены
-            </Button>
-            <Button
-              variant={activeTab === 'profile' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('profile')}
-              className="gap-2"
-            >
-              <Icon name="User" size={18} />
-              Профиль
-            </Button>
-          </nav>
-
-          <Button className="gap-2 bg-gradient-to-r from-primary to-secondary hover:opacity-90">
-            <Icon name="LogIn" size={18} />
-            Войти через Steam
-          </Button>
-        </div>
-      </header>
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <main className="container mx-auto px-4 py-8">
         {activeTab === 'home' && (
@@ -215,39 +88,12 @@ export default function Index() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {mockItems.map((item) => (
-                  <Card
+                  <ItemCard
                     key={item.id}
-                    className={`hover-scale cursor-pointer overflow-hidden border-2 ${getRarityClass(item.rarity)} ${isInCompare(item.id) ? 'ring-2 ring-primary' : ''} bg-card/50 backdrop-blur-sm group relative`}
-                  >
-                    <CardContent className="p-6">
-                      <Button
-                        size="sm"
-                        variant={isInCompare(item.id) ? 'default' : 'outline'}
-                        className="absolute top-2 right-2 z-10"
-                        onClick={() => toggleCompare(item)}
-                      >
-                        <Icon name={isInCompare(item.id) ? 'Check' : 'Plus'} size={16} />
-                      </Button>
-                      <div className="text-6xl mb-4 text-center group-hover:scale-110 transition-transform">
-                        {item.image}
-                      </div>
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <h4 className="font-semibold text-lg leading-tight">{item.name}</h4>
-                          <Badge className={getRarityBadgeColor(item.rarity)}>
-                            {item.rarity}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-2xl font-bold text-primary">${item.price}</span>
-                          <Button size="sm" className="gap-1">
-                            <Icon name="Repeat" size={16} />
-                            Обменять
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    item={item}
+                    isInCompare={isInCompare(item.id)}
+                    onToggleCompare={toggleCompare}
+                  />
                 ))}
               </div>
             </section>
@@ -479,104 +325,13 @@ export default function Index() {
         </div>
       </footer>
 
-      {compareItems.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-card border-t-2 border-primary shadow-2xl z-50">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                <Icon name="Scale" size={20} />
-                Сравнение предметов ({compareItems.length}/3)
-              </h3>
-              <div className="flex gap-2">
-                {compareItems.length >= 2 && (
-                  <Button onClick={() => setShowCompare(!showCompare)} className="gap-2">
-                    <Icon name="BarChart3" size={18} />
-                    {showCompare ? 'Скрыть' : 'Показать сравнение'}
-                  </Button>
-                )}
-                <Button variant="outline" onClick={clearCompare} className="gap-2">
-                  <Icon name="X" size={18} />
-                  Очистить
-                </Button>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-3 gap-4">
-              {compareItems.map((item) => (
-                <Card key={item.id} className={`border-2 ${getRarityClass(item.rarity)}`}>
-                  <CardContent className="p-4">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="absolute top-1 right-1"
-                      onClick={() => toggleCompare(item)}
-                    >
-                      <Icon name="X" size={14} />
-                    </Button>
-                    <div className="text-4xl text-center mb-2">{item.image}</div>
-                    <h4 className="font-semibold text-sm mb-2 truncate">{item.name}</h4>
-                    <div className="space-y-1 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Цена:</span>
-                        <span className="font-bold text-primary">${item.price}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Редкость:</span>
-                        <Badge className={`${getRarityBadgeColor(item.rarity)} text-xs`}>
-                          {item.rarity}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Категория:</span>
-                        <span>{item.category}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              {[...Array(3 - compareItems.length)].map((_, i) => (
-                <Card key={`empty-${i}`} className="border-2 border-dashed border-muted">
-                  <CardContent className="p-4 flex items-center justify-center h-full">
-                    <div className="text-center text-muted-foreground">
-                      <Icon name="Plus" size={32} className="mx-auto mb-2 opacity-50" />
-                      <p className="text-xs">Добавить предмет</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {showCompare && compareItems.length >= 2 && (
-              <div className="mt-4 p-4 bg-muted/30 rounded-lg">
-                <h4 className="font-bold mb-3 flex items-center gap-2">
-                  <Icon name="TrendingUp" size={18} />
-                  Анализ сравнения
-                </h4>
-                <div className="grid md:grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground mb-1">Самый дорогой:</p>
-                    <p className="font-bold text-primary">
-                      {compareItems.reduce((max, item) => item.price > max.price ? item : max).name}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground mb-1">Средняя цена:</p>
-                    <p className="font-bold text-secondary">
-                      ${(compareItems.reduce((sum, item) => sum + item.price, 0) / compareItems.length).toFixed(0)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground mb-1">Разница цен:</p>
-                    <p className="font-bold text-accent">
-                      ${Math.max(...compareItems.map(i => i.price)) - Math.min(...compareItems.map(i => i.price))}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <ComparePanel
+        compareItems={compareItems}
+        showCompare={showCompare}
+        onToggleShow={() => setShowCompare(!showCompare)}
+        onClear={clearCompare}
+        onRemoveItem={toggleCompare}
+      />
     </div>
   );
 }
